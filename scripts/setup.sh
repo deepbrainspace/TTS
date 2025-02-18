@@ -11,4 +11,4 @@ docker compose down --remove-orphans
 # Start docker containers
 docker compose up --build -d
 
-echo -e "\nSetup complete! The TTS service should be available at http://localhost:5002" 
+echo -e "\nSetup complete! The TTS service should be available at http://localhost:5002"
