@@ -3,20 +3,19 @@
         "multilingual": {
             "multi-dataset": {
                 "xtts_v2": {
-                    "description": "XTTS-v2.0.3 by Coqui with 17 languages.",
+                    "description": "XTTS-v2.0.3 with 17 languages.",
                     "hf_url": [
-                        "https://huggingface.co/coqui/XTTS-v2/resolve/main/model.pth",
-                        "https://huggingface.co/coqui/XTTS-v2/resolve/main/config.json",
-                        "https://huggingface.co/coqui/XTTS-v2/resolve/main/vocab.json",
-                        "https://huggingface.co/coqui/XTTS-v2/resolve/main/hash.md5",
-                        "https://huggingface.co/coqui/XTTS-v2/resolve/main/speakers_xtts.pth"
+                        "https://huggingface.co/deepbrainspace/TTS/resolve/main/model.pth",
+                        "https://huggingface.co/deepbrainspace/TTS/resolve/main/config.json",
+                        "https://huggingface.co/deepbrainspace/TTS/resolve/main/vocab.json",
+                        "https://huggingface.co/deepbrainspace/TTS/resolve/main/speakers_xtts.pth",
+                        "https://huggingface.co/deepbrainspace/TTS/resolve/main/dvae.pth",
+                        "https://huggingface.co/deepbrainspace/TTS/resolve/main/mel_stats.pth"
                     ],
-                    "model_hash": "10f92b55c512af7a8d39d650547a15a7",
                     "default_vocoder": null,
                     "commit": "480a6cdf7",
                     "license": "CPML",
-                    "contact": "info@coqui.ai",
-                    "tos_required": true
+                    "contact": "info@deepbrain.space"
                 },
                 "xtts_v1.1": {
                     "description": "XTTS-v1.1 by Coqui with 14 languages, cross-language voice cloning and reference leak fixed.",

@@ -1,0 +1,25 @@
+services:
+  tts:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "5002:5002"
+    volumes:
+      - ./models:/root/.local/share/tts/tts_models
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5002/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 5s
+    command: python3 -m TTS.server.server --model_path /root/.local/share/tts/tts_models/tts_models--multilingual--multi-dataset--xtts_v2/model.pth --config_path /root/.local/share/tts/tts_models/tts_models--multilingual--multi-dataset--xtts_v2/config.json 
