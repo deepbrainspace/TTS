@@ -18,9 +18,9 @@ def test_tts():
     )
     
     if response.status_code == 200:
-        with open("test_output.wav", "wb") as f:
+        with open("/mnt/r2-deepbrain/test_output.wav", "wb") as f:
             f.write(response.content)
-        print("TTS test successful! Output saved to test_output.wav")
+        print("TTS test successful! Output saved to /mnt/r2-deepbrain/test_output.wav")
     else:
         print("TTS test failed:", response.text)
 

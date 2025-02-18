@@ -1,6 +1,15 @@
+name: deepbrain-tts
+
+networks:
+  tts-net:    # Define custom network name
+    name: deepbrain-tts-net
+
 services:
-  tts:
+  tts-server:
+    container_name: deepbrain-tts-server
     build: .
+    networks:
+      - tts-net
     ports:
       - "5002:5002"
     volumes:
