@@ -1,12 +1,14 @@
 services:
   tts:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    build: .
     ports:
       - "5002:5002"
     volumes:
       - ./models:/root/.local/share/tts/tts_models
+    command: >
+      /app/.venv/bin/python -m TTS.server.server 
+      --model_path /root/.local/share/tts/tts_models/tts_models--multilingual--multi-dataset--xtts_v2/model.pth 
+      --config_path /root/.local/share/tts/tts_models/tts_models--multilingual--multi-dataset--xtts_v2/config.json
     deploy:
       resources:
         reservations:
@@ -21,5 +23,4 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
-      start_period: 5s
-    command: python3 -m TTS.server.server --model_path /root/.local/share/tts/tts_models/tts_models--multilingual--multi-dataset--xtts_v2/model.pth --config_path /root/.local/share/tts/tts_models/tts_models--multilingual--multi-dataset--xtts_v2/config.json 
+      start_period: 5s 

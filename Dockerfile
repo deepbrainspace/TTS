@@ -1,31 +1,39 @@
-ARG BASE=nvidia/cuda:11.8.0-base-ubuntu22.04
-FROM ${BASE}
+FROM nvidia/cuda:11.8.0-runtime-ubuntu22.04
 
-RUN apt-get update && \
-  apt-get upgrade -y
-RUN apt-get install -y --no-install-recommends \
-    gcc g++ make python3 python3-dev python3-pip \
-    python3-venv python3-wheel espeak-ng \
-    libsndfile1-dev libc-dev curl && \
-  rm -rf /var/lib/apt/lists/*
+ENV DEBIAN_FRONTEND=noninteractive
+ENV COQUI_TOS_AGREED=1
 
-# Install Rust compiler (to build sudachipy for Mac)
-RUN curl --proto '=https' --tlsv1.2 -sSf "https://sh.rustup.rs" | sh -s -- -y
-ENV PATH="/root/.cargo/bin:${PATH}"
+RUN apt-get update && apt-get install -y \
+    python3 \
+    python3-pip \
+    git \
+    espeak-ng \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
 
-RUN pip3 install -U pip setuptools wheel
-RUN pip3 install -U "spacy[ja]<3.8"
-RUN pip3 install llvmlite --ignore-installed
+WORKDIR /app
 
-# Install Dependencies:
-RUN pip3 install torch torchaudio --extra-index-url https://download.pytorch.org/whl/cu118
-RUN rm -rf /root/.cache/pip
+# Copy the TTS code
+COPY . /app/TTS/
 
-# Copy TTS repository contents:
-WORKDIR /root
-COPY . /root
+# Create and activate virtual environment using uv
+RUN pip3 install uv
+RUN uv venv /app/.venv
+ENV PATH="/app/.venv/bin:$PATH"
 
-RUN pip3 install -e .[all]
+# Install TTS and dependencies
+WORKDIR /app/TTS
+RUN uv pip install -e .
+RUN uv pip install numpy==1.24.3
+RUN uv pip install "torch>=2.1.0"
+RUN uv pip install "torchaudio>=2.1.0"
 
-ENTRYPOINT ["tts"]
-CMD ["--help"]
+# Pre-download the model during build
+RUN mkdir -p /root/.local/share/tts && \
+    python3 -c "from TTS.utils.manage import ModelManager; ModelManager().download_model('tts_models/multilingual/multi-dataset/xtts_v2')"
+
+EXPOSE 5002
+
+# Add a health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD curl -f http://localhost:5002/health || exit 1
