@@ -235,174 +235,66 @@ tts.tts_to_file(text="Ich bin eine Testnachricht.", file_path=OUTPUT_PATH)
 
 #### Voice conversion (VC)
 
-Converting the voice in `source_wav` to the voice of `target_wav`:
+Converting the voice in `source_wav`
 
+
+## 🔗 Examples
+
+### Basic TTS Usage
 ```python
-tts = TTS("voice_conversion_models/multilingual/vctk/freevc24").to("cuda")
+from TTS.api import TTS
+
+# List available models and select the desired one
+print(TTS().list_models())
+tts = TTS(model_name="tts_models/multilingual/multi-dataset/xtts_v2")
+
+# Simple TTS with default settings
+tts.tts_to_file(text="Hello world!", file_path="output.wav")
+```
+
+### Custom Voice Cloning
+```python
+# Using a custom voice reference file
+tts.tts_to_file(
+    text="Hello, this is a cloned voice.", 
+    file_path="output_cloned.wav",
+    speaker_wav="path/to/reference.wav",
+    language="en"
+)
+```
+
+### Voice Style and Emotion
+```python
+# Using style reference audio
+tts.tts_to_file(
+    text="Text with specific style.", 
+    file_path="output_styled.wav",
+    speaker_wav="path/to/voice.wav",
+    language="en",
+    capacitron_style_wav="path/to/style_reference.wav",
+    capacitron_style_text="Text matching the style audio"
+)
+```
+
+### Voice Conversion
+```python
+# Converting voice from source to target
+tts = TTS("voice_conversion_models/multilingual/vctk/freevc24")
 tts.voice_conversion_to_file(
-  source_wav="my/source.wav",
-  target_wav="my/target.wav",
-  file_path="output.wav"
+    source_wav="path/to/source.wav",
+    target_wav="path/to/target.wav",
+    file_path="output_converted.wav"
 )
 ```
 
-Other available voice conversion models:
-- `voice_conversion_models/multilingual/multi-dataset/knnvc`
-- `voice_conversion_models/multilingual/multi-dataset/openvoice_v1`
-- `voice_conversion_models/multilingual/multi-dataset/openvoice_v2`
-
-For more details, see the
-[documentation](https://coqui-tts.readthedocs.io/en/latest/vc.html).
-
-#### Voice cloning by combining single speaker TTS model with the default VC model
-
-This way, you can clone voices by using any model in 🐸TTS. The FreeVC model is
-used for voice conversion after synthesizing speech.
-
-```python
-
-tts = TTS("tts_models/de/thorsten/tacotron2-DDC")
-tts.tts_with_vc_to_file(
-    "Wie sage ich auf Italienisch, dass ich dich liebe?",
-    speaker_wav="target/speaker.wav",
-    file_path="output.wav"
-)
+### Web Interface
+```bash
+# Run the TTS server with web interface
+tts-server --model_name tts_models/multilingual/multi-dataset/xtts_v2 --port 5002 --use_cuda true
 ```
+Access the web interface at `http://localhost:5002`
 
-#### TTS using Fairseq models in ~1100 languages 🤯
-For Fairseq models, use the following name format: `tts_models/<lang-iso_code>/fairseq/vits`.
-You can find the language ISO codes [here](https://dl.fbaipublicfiles.com/mms/tts/all-tts-languages.html)
-and learn about the Fairseq models [here](https://github.com/facebookresearch/fairseq/tree/main/examples/mms).
-
-```python
-# TTS with fairseq models
-api = TTS("tts_models/deu/fairseq/vits")
-api.tts_to_file(
-    "Wie sage ich auf Italienisch, dass ich dich liebe?",
-    file_path="output.wav"
-)
+# Mounting External Volume to Docker
+```bash
+ docker run -v /mnt/r2-deepbrain:/output --rm -it -p 5002:5002 --gpus all --entrypoint /bin/bash tts
 ```
-
-### Command-line interface `tts`
-
-<!-- begin-tts-readme -->
-
-Synthesize speech on the command line.
-
-You can either use your trained model or choose a model from the provided list.
-
-- List provided models:
-
-  ```sh
-  tts --list_models
-  ```
-
-- Get model information. Use the names obtained from `--list_models`.
-  ```sh
-  tts --model_info_by_name "<model_type>/<language>/<dataset>/<model_name>"
-  ```
-  For example:
-  ```sh
-  tts --model_info_by_name tts_models/tr/common-voice/glow-tts
-  tts --model_info_by_name vocoder_models/en/ljspeech/hifigan_v2
-  ```
-
-#### Single speaker models
-
-- Run TTS with the default model (`tts_models/en/ljspeech/tacotron2-DDC`):
-
-  ```sh
-  tts --text "Text for TTS" --out_path output/path/speech.wav
-  ```
-
-- Run TTS and pipe out the generated TTS wav file data:
-
-  ```sh
-  tts --text "Text for TTS" --pipe_out --out_path output/path/speech.wav | aplay
-  ```
-
-- Run a TTS model with its default vocoder model:
-
-  ```sh
-  tts --text "Text for TTS" \
-      --model_name "<model_type>/<language>/<dataset>/<model_name>" \
-      --out_path output/path/speech.wav
-  ```
-
-  For example:
-
-  ```sh
-  tts --text "Text for TTS" \
-      --model_name "tts_models/en/ljspeech/glow-tts" \
-      --out_path output/path/speech.wav
-  ```
-
-- Run with specific TTS and vocoder models from the list. Note that not every vocoder is compatible with every TTS model.
-
-  ```sh
-  tts --text "Text for TTS" \
-      --model_name "<model_type>/<language>/<dataset>/<model_name>" \
-      --vocoder_name "<model_type>/<language>/<dataset>/<model_name>" \
-      --out_path output/path/speech.wav
-  ```
-
-  For example:
-
-  ```sh
-  tts --text "Text for TTS" \
-      --model_name "tts_models/en/ljspeech/glow-tts" \
-      --vocoder_name "vocoder_models/en/ljspeech/univnet" \
-      --out_path output/path/speech.wav
-  ```
-
-- Run your own TTS model (using Griffin-Lim Vocoder):
-
-  ```sh
-  tts --text "Text for TTS" \
-      --model_path path/to/model.pth \
-      --config_path path/to/config.json \
-      --out_path output/path/speech.wav
-  ```
-
-- Run your own TTS and Vocoder models:
-
-  ```sh
-  tts --text "Text for TTS" \
-      --model_path path/to/model.pth \
-      --config_path path/to/config.json \
-      --out_path output/path/speech.wav \
-      --vocoder_path path/to/vocoder.pth \
-      --vocoder_config_path path/to/vocoder_config.json
-  ```
-
-#### Multi-speaker models
-
-- List the available speakers and choose a `<speaker_id>` among them:
-
-  ```sh
-  tts --model_name "<language>/<dataset>/<model_name>"  --list_speaker_idxs
-  ```
-
-- Run the multi-speaker TTS model with the target speaker ID:
-
-  ```sh
-  tts --text "Text for TTS." --out_path output/path/speech.wav \
-      --model_name "<language>/<dataset>/<model_name>"  --speaker_idx <speaker_id>
-  ```
-
-- Run your own multi-speaker TTS model:
-
-  ```sh
-  tts --text "Text for TTS" --out_path output/path/speech.wav \
-      --model_path path/to/model.pth --config_path path/to/config.json \
-      --speakers_file_path path/to/speaker.json --speaker_idx <speaker_id>
-  ```
-
-#### Voice conversion models
-
-```sh
-tts --out_path output/path/speech.wav --model_name "<language>/<dataset>/<model_name>" \
-    --source_wav <path/to/speaker/wav> --target_wav <path/to/reference/wav>
-```
-
-<!-- end-tts-readme -->

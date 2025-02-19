@@ -2,6 +2,7 @@ ARG BASE=nvidia/cuda:11.8.0-base-ubuntu22.04
 FROM ${BASE}
 
 EXPOSE 5000
+VOLUME /mnt/r2-deepbrain
 
 RUN apt-get update && \
   apt-get upgrade -y
