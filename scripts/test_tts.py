@@ -1,29 +1,37 @@
 import requests
+import argparse
 import json
 
-def test_health():
-    response = requests.get("http://localhost:5002/health")
-    print("Health check:", response.json())
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--text", default="Hello, this is a test.")
+    parser.add_argument("--language", default="en")
+    parser.add_argument("--output", default="test.wav")
+    args = parser.parse_args()
 
-def test_tts():
-    data = {
-        "text": "This is a test of the TTS system",
-        "language": "en"
+    # Proper request format
+    payload = {
+        "text": args.text,
+        "language": args.language
     }
-    
-    response = requests.post(
-        "http://localhost:5002/tts",
-        json=data,
-        headers={"Content-Type": "application/json"}
-    )
-    
-    if response.status_code == 200:
-        with open("/mnt/r2-deepbrain/test_output.wav", "wb") as f:
-            f.write(response.content)
-        print("TTS test successful! Output saved to /mnt/r2-deepbrain/test_output.wav")
-    else:
-        print("TTS test failed:", response.text)
+
+    try:
+        response = requests.post(
+            "http://localhost:5002/api/tts",
+            json=payload,
+            headers={"Content-Type": "application/json"}
+        )
+        
+        if response.status_code == 200:
+            with open(args.output, "wb") as f:
+                f.write(response.content)
+            print(f"Audio saved to {args.output}")
+        else:
+            print(f"Error: {response.status_code}")
+            print(response.text)
+    except requests.exceptions.ConnectionError:
+        print("Error: Could not connect to server. Is the server running?")
+        print("Start server with: python3 -m TTS.server.server --model_path models/... --config_path models/...")
 
 if __name__ == "__main__":
-    test_health()
-    test_tts() 
+    main() 
