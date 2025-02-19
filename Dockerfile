@@ -1,6 +1,8 @@
 ARG BASE=nvidia/cuda:11.8.0-base-ubuntu22.04
 FROM ${BASE}
 
+EXPOSE 5000
+
 RUN apt-get update && \
   apt-get upgrade -y
 RUN apt-get install -y --no-install-recommends \
